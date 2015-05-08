@@ -9,6 +9,6 @@ You will control the ship at the bottom of the screen. The ship will be able to 
 Your job is to positively radiate healing energy and good vibes towards your family members. Once all members have been successfully healed, you will be rewarded with a special message.
 
 ## Controls:
-LEFT ARROW -> Move left
-RIGHT ARROW -> Move Right
-SPACE -> Shoot healing ray
+- LEFT ARROW -> Move left
+- RIGHT ARROW -> Move Right
+- SPACE -> Shoot healing ray
