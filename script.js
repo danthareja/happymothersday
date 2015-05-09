@@ -46,10 +46,8 @@ var makeFamilyMember = function (src, x, y) {
 		if (!saved) {
 			context.drawImage(familyMember, x, y, height, width);
 		} else {
-			context.fillStyle = 'yellow';
-			context.fillRect(x, y, height, width);
-			// familyMember.src = src.split('.jpg')[0] + '-saved.jpg';
-			// context.drawImage(familyMember, x, y, height, width);
+			familyMember.src = src.split('.jpg')[0] + '-saved.jpg';
+			context.drawImage(familyMember, x, y, height, width);
 		}
 	}
 
