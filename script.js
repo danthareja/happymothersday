@@ -10,7 +10,7 @@ var context = canvas.getContext('2d');
 var makeMom = function (x, y) {
 	var height = 25;
 	var width = 25;
-	var velocity = 5;
+	var velocity = 15;
 
 	var putOnCanvas = function () {
 		context.fillStyle = "red";
@@ -25,10 +25,16 @@ var makeMom = function (x, y) {
 		x += velocity;
 	}
 
+	var heal = function () {
+		var newRay = makeHealingRay(x + (width/2),y);
+		healingRays.push(newRay);
+	}
+
 	return {
 		moveLeft: moveLeft,
 		moveRight: moveRight,
-		putOnCanvas: putOnCanvas
+		putOnCanvas: putOnCanvas,
+		heal: heal
 	};
 }
 
@@ -45,7 +51,6 @@ var makeFamilyMember = function (x, y) {
 
 	var reverseDirection = function () {
 		velocity *= (-1);
-		console.log('direction was reversed, velocity now equals', velocity);
 	}
 
 	var isOnRightEdge = function () {
@@ -59,19 +64,82 @@ var makeFamilyMember = function (x, y) {
 	var move = function () {
 		x += velocity;
 	}
+
+	var getX = function () {
+		return x;
+	}
+
+	var getY = function () {
+		return y;
+	}
+
+	var getHeight = function () {
+		return height;
+	}
+
+	var getWidth = function () {
+		return width;
+	}
+
 	return {
 		putOnCanvas: putOnCanvas,
 		reverseDirection: reverseDirection,
 		isOnLeftEdge: isOnLeftEdge,
 		isOnRightEdge: isOnRightEdge,
-		move: move
+		move: move,
+		getX: getX,
+		getY: getY,
+		getHeight: getHeight,
+		getWidth: getWidth
 	};
 };
+
+var makeHealingRay = function (x, y) {
+
+	var height = 5;
+	var width = 5;
+	var velocity = 10;
+
+	var putOnCanvas = function() {
+		context.fillStyle = "yellow";
+		context.fillRect(x, y, height, width);
+	}
+
+	var move = function () {
+		y -= velocity;
+	}
+
+	var getX = function () {
+		return x;
+	}
+
+	var getY = function () {
+		return y;
+	}
+
+	var getHeight = function () {
+		return height;
+	}
+
+	var getWidth = function () {
+		return width;
+	}
+
+	return {
+		putOnCanvas: putOnCanvas,
+		move: move,
+		getX: getX,
+		getY: getY,
+		getHeight: getHeight,
+		getWidth: getWidth
+	};
+}
 
 // Initial Building the Board
 
 var mom = makeMom(canvas.width / 2 - .5 * 25, canvas.height - 25);
 var familyMembers = [];
+var healingRays = [];
 
 for (var y=0; y<4; y++) {
 	for (var x=0; x<canvas.width; x+=canvas.width/5) {
@@ -80,17 +148,16 @@ for (var y=0; y<4; y++) {
 }
 
 
+
 var patrolTheSkies = function () {
 	// Check if the right edge of family members hits edge of canvas
 	if (familyMembers[4].isOnRightEdge()) {
-		console.log('hey, listen! family just hit the right edge');
 		familyMembers.forEach(function (member) {
 			member.reverseDirection();
 		});
 	}	
 	// Check if the left edge of family members hits edge of canvas
 	else if (familyMembers[0].isOnLeftEdge()) {
-		console.log('hey, listen! family just hit the left edge');
 		familyMembers.forEach(function (member) {
 			member.reverseDirection();
 		});
@@ -102,6 +169,32 @@ var patrolTheSkies = function () {
 	});
 }
 
+var beamMeUp = function () {
+	healingRays.forEach(function (ray) {
+		if (ray.getY() < 0) {
+			healingRays.shift();
+		}
+
+		familyMembers.forEach(function (member) {
+			if (didItCollide(ray, member)) {
+				console.log('ITS A hit!');
+			}
+		})
+		ray.move();
+		ray.putOnCanvas();
+	})
+
+}
+
+
+var didItCollide = function (object1, object2) {
+	return (object1.getX() < object2.getX() + object2.getWidth() && 
+		object1.getX() + object1.getWidth()  > object2.getX() &&
+		object1.getY() < object2.getY() + object2.getHeight() && 
+		object1.getY() + object1.getHeight() > object2.getY()); 
+}
+
+
 // This is the main run block that re-draws the canvas
 
 var tick = function () {
@@ -110,7 +203,9 @@ var tick = function () {
 	// Re-paint based on updated positioning
 	patrolTheSkies();
 	mom.putOnCanvas();
+	beamMeUp();
 	requestAnimationFrame(tick);
+
 }
 
 
@@ -124,5 +219,9 @@ document.addEventListener('keydown', function (e) {
 	if (e.keyCode === 39) {
 		mom.moveRight();
 	}
+	if (e.keyCode === 32) {
+		mom.heal();
+	}
+
 })
-tick();
+// tick();
