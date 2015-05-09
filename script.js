@@ -5,6 +5,8 @@ var makeMom = function (src, x, y) {
 	var height = 50;
 	var width = 50;
 	var velocity = 15;
+	var moving = false;
+
 	var mom = new Image();
 	mom.src = src;
 
@@ -12,12 +14,24 @@ var makeMom = function (src, x, y) {
 		context.drawImage(mom, x, y, height, width);
 	}
 
+	var stopMoving = function() {
+		moving = false;
+	}
+
 	var moveLeft = function () {
-		x -= velocity;
+		moving = true;
+		velocity = -5;
 	}
 
 	var moveRight = function () {
-		x += velocity;
+		moving = true;
+		velocity = 5;
+	}
+
+	var move = function() {
+		if (moving) {
+			x += velocity;
+		}
 	}
 
 	var heal = function () {
@@ -28,6 +42,8 @@ var makeMom = function (src, x, y) {
 	return {
 		moveLeft: moveLeft,
 		moveRight: moveRight,
+		stopMoving: stopMoving,
+		move: move,
 		putOnCanvas: putOnCanvas,
 		heal: heal
 	};
@@ -114,14 +130,15 @@ var makeFamilyMember = function (src, x, y) {
 };
 
 var makeHealingRay = function (x, y) {
+	var height = 15;
+	var width = 15;
+	var velocity = 8;
 
-	var height = 5;
-	var width = 5;
-	var velocity = 10;
+	var healingRay = new Image();
+	healingRay.src = './images/heart.png'
 
 	var putOnCanvas = function() {
-		context.fillStyle = "red";
-		context.fillRect(x, y, height, width);
+		context.drawImage(healingRay, x, y, height, width);
 	}
 
 	var move = function () {
@@ -239,6 +256,7 @@ var tick = function () {
 	// Re-paint based on updated positioning
 	if (familyMembers.stillSomeToSave()) {
 		patrolTheSkies();
+		mom.move();
 		mom.putOnCanvas();
 		beamMeUp();
 		requestAnimationFrame(tick);
@@ -286,6 +304,12 @@ document.addEventListener('keydown', function (e) {
 	}
 	if (e.keyCode === 32) {
 		mom.heal();
+	}
+})
+
+document.addEventListener('keyup', function(e) {
+	if (e.keyCode === 37 || e.keyCode === 39) {
+		mom.stopMoving();
 	}
 })
 
