@@ -7,14 +7,15 @@ var context = canvas.getContext('2d');
 
 
 
-var makeMom = function (x, y) {
-	var height = 25;
-	var width = 25;
+var makeMom = function (src, x, y) {
+	var height = 50;
+	var width = 50;
 	var velocity = 15;
+	var mom = new Image();
+	mom.src = src;
 
 	var putOnCanvas = function () {
-		context.fillStyle = "red";
-		context.fillRect(x, y, width, height);
+		context.drawImage(mom, x, y, height, width);
 	}
 
 	var moveLeft = function () {
@@ -38,15 +39,15 @@ var makeMom = function (x, y) {
 	};
 }
 
-var makeFamilyMember = function (x, y) {
-
+var makeFamilyMember = function (src, x, y) {
 	var height = 50;
 	var width = 50;
 	var velocity = -2;
+	var familyMember = new Image();
+	familyMember.src = src;
 
 	var putOnCanvas = function() {
-		context.fillStyle = "green";
-		context.fillRect(x, y, width, height);
+		context.drawImage(familyMember, x, y, height, width);
 	}
 
 	var reverseDirection = function () {
@@ -137,15 +138,24 @@ var makeHealingRay = function (x, y) {
 
 // Initial Building the Board
 
-var mom = makeMom(canvas.width / 2 - .5 * 25, canvas.height - 25);
+var mom = makeMom('./images/mom.jpg', canvas.width / 2 - .5 * 50, canvas.height - 50);
 var familyMembers = [];
 var healingRays = [];
 
+// Initial Building the Board
+
+// Crafty little way to get a array of randomized image sources
+var familyPhotos = Array.apply(null, new Array(20))
+  .map(function(x, i) { return './images/' + i + '.jpg' })
+	.sort(function(a, b) { return Math.random() > 0.5 });
+
 for (var y=0; y<4; y++) {
 	for (var x=0; x<canvas.width; x+=canvas.width/5) {
-		familyMembers.push(makeFamilyMember(x, y * 60));
-	}	
+		console.log(familyPhotos[familyPhotos.length - 1])
+		familyMembers.push(makeFamilyMember(familyPhotos.pop(), x, y * 60));
+	}
 }
+
 
 
 
