@@ -1,12 +1,6 @@
 var canvas = document.getElementById('gameBoard');
 var context = canvas.getContext('2d');
 
-// Configuration 
-// var movingWidth = canvas.width * .10;
-// var workingWidth = canvas.width - 2 * movingWidth;
-
-
-
 var makeMom = function (src, x, y) {
 	var height = 50;
 	var width = 50;
@@ -43,11 +37,20 @@ var makeFamilyMember = function (src, x, y) {
 	var height = 50;
 	var width = 50;
 	var velocity = -2;
+	var saved = false;
+
 	var familyMember = new Image();
 	familyMember.src = src;
 
 	var putOnCanvas = function() {
-		context.drawImage(familyMember, x, y, height, width);
+		if (!saved) {
+			context.drawImage(familyMember, x, y, height, width);
+		} else {
+			context.fillStyle = 'yellow';
+			context.fillRect(x, y, height, width);
+			// familyMember.src = src.split('.jpg')[0] + '-saved.jpg';
+			// context.drawImage(familyMember, x, y, height, width);
+		}
 	}
 
 	var reverseDirection = function () {
@@ -63,7 +66,9 @@ var makeFamilyMember = function (src, x, y) {
 	}
 
 	var move = function () {
-		x += velocity;
+		if (!saved) {
+			x += velocity;
+		}
 	}
 
 	var getX = function () {
@@ -86,10 +91,12 @@ var makeFamilyMember = function (src, x, y) {
 		return src;
 	}
 
-	var destroy = function() {
-		familyMembers = familyMembers.filter(function(member) {
-			return member.getSrc() !== src;
-		});
+	var isSaved = function() {
+		return saved;
+	}
+
+	var saveWithMomsLove = function() {
+		saved = true;
 	}
 
 	return {
@@ -97,13 +104,14 @@ var makeFamilyMember = function (src, x, y) {
 		reverseDirection: reverseDirection,
 		isOnLeftEdge: isOnLeftEdge,
 		isOnRightEdge: isOnRightEdge,
+		isSaved,
 		move: move,
 		getX: getX,
 		getY: getY,
 		getHeight: getHeight,
 		getWidth: getWidth,
 		getSrc: getSrc,
-		destroy: destroy
+		saveWithMomsLove: saveWithMomsLove
 	};
 };
 
@@ -114,7 +122,7 @@ var makeHealingRay = function (x, y) {
 	var velocity = 10;
 
 	var putOnCanvas = function() {
-		context.fillStyle = "yellow";
+		context.fillStyle = "red";
 		context.fillRect(x, y, height, width);
 	}
 
@@ -201,9 +209,9 @@ var beamMeUp = function () {
 		}
 
 		familyMembers.forEach(function (member) {
-			if (didItCollide(ray, member)) {
+			if (didItCollide(ray, member) && !member.isSaved()) {
 				console.log('ITS A hit!');
-				member.destroy();
+				member.saveWithMomsLove();
 				healingRays.shift();
 			}
 		})
@@ -248,6 +256,6 @@ document.addEventListener('keydown', function (e) {
 	if (e.keyCode === 32) {
 		mom.heal();
 	}
-
 })
+
 tick();
