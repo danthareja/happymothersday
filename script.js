@@ -82,6 +82,16 @@ var makeFamilyMember = function (src, x, y) {
 		return width;
 	}
 
+	var getSrc = function() {
+		return src;
+	}
+
+	var destroy = function() {
+		familyMembers = familyMembers.filter(function(member) {
+			return member.getSrc() !== src;
+		});
+	}
+
 	return {
 		putOnCanvas: putOnCanvas,
 		reverseDirection: reverseDirection,
@@ -91,7 +101,9 @@ var makeFamilyMember = function (src, x, y) {
 		getX: getX,
 		getY: getY,
 		getHeight: getHeight,
-		getWidth: getWidth
+		getWidth: getWidth,
+		getSrc: getSrc,
+		destroy: destroy
 	};
 };
 
@@ -156,22 +168,25 @@ for (var y=0; y<4; y++) {
 	}
 }
 
-
-
-
 var patrolTheSkies = function () {
+	var rightmost = familyMembers.reduce(function(rightMostMemberSoFar, currentMember) {
+		if (currentMember.getX() > rightMostMemberSoFar.getX()) {
+			rightMostMemberSoFar = currentMember;
+		}
+		return rightMostMemberSoFar;
+	})
+	var leftmost = familyMembers.reduce(function(leftMostMemberSoFar, currentMember) {
+		if (currentMember.getX() < leftMostMemberSoFar.getX()) {
+			leftMostMemberSoFar = currentMember;
+		}
+		return leftMostMemberSoFar;
+	})
 	// Check if the right edge of family members hits edge of canvas
-	if (familyMembers[4].isOnRightEdge()) {
+	if (leftmost.isOnLeftEdge() || rightmost.isOnRightEdge()) {
 		familyMembers.forEach(function (member) {
 			member.reverseDirection();
 		});
 	}	
-	// Check if the left edge of family members hits edge of canvas
-	else if (familyMembers[0].isOnLeftEdge()) {
-		familyMembers.forEach(function (member) {
-			member.reverseDirection();
-		});
-	}
 
 	familyMembers.forEach(function (member) {
 		member.move();
@@ -188,12 +203,13 @@ var beamMeUp = function () {
 		familyMembers.forEach(function (member) {
 			if (didItCollide(ray, member)) {
 				console.log('ITS A hit!');
+				member.destroy();
+				healingRays.shift();
 			}
 		})
 		ray.move();
 		ray.putOnCanvas();
-	})
-
+	});
 }
 
 
@@ -234,4 +250,4 @@ document.addEventListener('keydown', function (e) {
 	}
 
 })
-// tick();
+tick();
