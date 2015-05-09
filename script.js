@@ -174,6 +174,10 @@ for (var y=0; y<4; y++) {
 	}
 }
 
+familyMembers.stillSomeToSave = function() {
+	return this.filter(function(member) { return !member.isSaved()}).length > 0;
+}
+
 var patrolTheSkies = function () {
 	var rightmost = familyMembers.reduce(function(rightMostMemberSoFar, currentMember) {
 		if (currentMember.getX() > rightMostMemberSoFar.getX()) {
@@ -187,6 +191,7 @@ var patrolTheSkies = function () {
 		}
 		return leftMostMemberSoFar;
 	})
+
 	// Check if the right edge of family members hits edge of canvas
 	if (leftmost.isOnLeftEdge() || rightmost.isOnRightEdge()) {
 		familyMembers.forEach(function (member) {
@@ -208,7 +213,6 @@ var beamMeUp = function () {
 
 		familyMembers.forEach(function (member) {
 			if (didItCollide(ray, member) && !member.isSaved()) {
-				console.log('ITS A hit!');
 				member.saveWithMomsLove();
 				healingRays.shift();
 			}
@@ -233,16 +237,45 @@ var tick = function () {
 	// Clears entire canvas
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	// Re-paint based on updated positioning
-	patrolTheSkies();
-	mom.putOnCanvas();
-	beamMeUp();
-	requestAnimationFrame(tick);
-
+	if (familyMembers.stillSomeToSave()) {
+		patrolTheSkies();
+		mom.putOnCanvas();
+		beamMeUp();
+		requestAnimationFrame(tick);
+	} else {
+		// We win!
+		greatSuccess();
+	}
 }
 
+var greatSuccess = function() {
+	var victoryMessage = [
+	  'You purged the zombie plague with your love',
+	  'And there\'s still plenty to go around',
+	  '',
+	  'Happy Mother\'s Day!',
+	  '<3 Boys'
+	];
+
+	var x = 50;
+	var y = 150;
+	var fontSize = 22;
+	var gradient = context.createLinearGradient(x,y,x,y + victoryMessage.length * fontSize);
+
+	gradient.addColorStop(0,"pink");
+	gradient.addColorStop(1,"purple");
+	context.fillStyle = gradient;
+	context.font =  fontSize + 'px serif';
+
+	victoryMessage.forEach(function(line) {
+		context.fillText(line, x, y, canvas.width);
+		y += fontSize;
+	});
+
+	mom.putOnCanvas();
+}
 
 // Assign movement to keyboard
-
 document.addEventListener('keydown', function (e) {
 	e.preventDefault();
 	if (e.keyCode === 37) {
