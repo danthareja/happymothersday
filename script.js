@@ -1,16 +1,12 @@
 var canvas = document.getElementById('gameBoard');
 var context = canvas.getContext('2d');
 
-// Configuration 
-// var movingWidth = canvas.width * .10;
-// var workingWidth = canvas.width - 2 * movingWidth;
-
-
-
 var makeMom = function (src, x, y) {
 	var height = 50;
 	var width = 50;
 	var velocity = 15;
+	var moving = false;
+
 	var mom = new Image();
 	mom.src = src;
 
@@ -18,12 +14,24 @@ var makeMom = function (src, x, y) {
 		context.drawImage(mom, x, y, height, width);
 	}
 
+	var stopMoving = function() {
+		moving = false;
+	}
+
 	var moveLeft = function () {
-		x -= velocity;
+		moving = true;
+		velocity = -5;
 	}
 
 	var moveRight = function () {
-		x += velocity;
+		moving = true;
+		velocity = 5;
+	}
+
+	var move = function() {
+		if (moving) {
+			x += velocity;
+		}
 	}
 
 	var heal = function () {
@@ -34,6 +42,8 @@ var makeMom = function (src, x, y) {
 	return {
 		moveLeft: moveLeft,
 		moveRight: moveRight,
+		stopMoving: stopMoving,
+		move: move,
 		putOnCanvas: putOnCanvas,
 		heal: heal
 	};
@@ -43,11 +53,18 @@ var makeFamilyMember = function (src, x, y) {
 	var height = 50;
 	var width = 50;
 	var velocity = -2;
+	var saved = false;
+
 	var familyMember = new Image();
 	familyMember.src = src;
 
 	var putOnCanvas = function() {
-		context.drawImage(familyMember, x, y, height, width);
+		if (!saved) {
+			context.drawImage(familyMember, x, y, height, width);
+		} else {
+			familyMember.src = src.split('.jpg')[0] + '-saved.jpg';
+			context.drawImage(familyMember, x, y, height, width);
+		}
 	}
 
 	var reverseDirection = function () {
@@ -63,7 +80,9 @@ var makeFamilyMember = function (src, x, y) {
 	}
 
 	var move = function () {
-		x += velocity;
+		if (!saved) {
+			x += velocity;
+		}
 	}
 
 	var getX = function () {
@@ -86,10 +105,12 @@ var makeFamilyMember = function (src, x, y) {
 		return src;
 	}
 
-	var destroy = function() {
-		familyMembers = familyMembers.filter(function(member) {
-			return member.getSrc() !== src;
-		});
+	var isSaved = function() {
+		return saved;
+	}
+
+	var saveWithMomsLove = function() {
+		saved = true;
 	}
 
 	return {
@@ -97,25 +118,27 @@ var makeFamilyMember = function (src, x, y) {
 		reverseDirection: reverseDirection,
 		isOnLeftEdge: isOnLeftEdge,
 		isOnRightEdge: isOnRightEdge,
+		isSaved,
 		move: move,
 		getX: getX,
 		getY: getY,
 		getHeight: getHeight,
 		getWidth: getWidth,
 		getSrc: getSrc,
-		destroy: destroy
+		saveWithMomsLove: saveWithMomsLove
 	};
 };
 
 var makeHealingRay = function (x, y) {
+	var height = 15;
+	var width = 15;
+	var velocity = 8;
 
-	var height = 5;
-	var width = 5;
-	var velocity = 10;
+	var healingRay = new Image();
+	healingRay.src = './images/heart.png'
 
 	var putOnCanvas = function() {
-		context.fillStyle = "yellow";
-		context.fillRect(x, y, height, width);
+		context.drawImage(healingRay, x, y, height, width);
 	}
 
 	var move = function () {
@@ -168,6 +191,10 @@ for (var y=0; y<4; y++) {
 	}
 }
 
+familyMembers.stillSomeToSave = function() {
+	return this.filter(function(member) { return !member.isSaved()}).length > 0;
+}
+
 var patrolTheSkies = function () {
 	var rightmost = familyMembers.reduce(function(rightMostMemberSoFar, currentMember) {
 		if (currentMember.getX() > rightMostMemberSoFar.getX()) {
@@ -181,6 +208,7 @@ var patrolTheSkies = function () {
 		}
 		return leftMostMemberSoFar;
 	})
+
 	// Check if the right edge of family members hits edge of canvas
 	if (leftmost.isOnLeftEdge() || rightmost.isOnRightEdge()) {
 		familyMembers.forEach(function (member) {
@@ -201,9 +229,8 @@ var beamMeUp = function () {
 		}
 
 		familyMembers.forEach(function (member) {
-			if (didItCollide(ray, member)) {
-				console.log('ITS A hit!');
-				member.destroy();
+			if (didItCollide(ray, member) && !member.isSaved()) {
+				member.saveWithMomsLove();
 				healingRays.shift();
 			}
 		})
@@ -227,16 +254,46 @@ var tick = function () {
 	// Clears entire canvas
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	// Re-paint based on updated positioning
-	patrolTheSkies();
-	mom.putOnCanvas();
-	beamMeUp();
-	requestAnimationFrame(tick);
-
+	if (familyMembers.stillSomeToSave()) {
+		patrolTheSkies();
+		mom.move();
+		mom.putOnCanvas();
+		beamMeUp();
+		requestAnimationFrame(tick);
+	} else {
+		// We win!
+		greatSuccess();
+	}
 }
 
+var greatSuccess = function() {
+	var victoryMessage = [
+	  'You purged the zombie plague with your love',
+	  'And there\'s still plenty to go around',
+	  '',
+	  'Happy Mother\'s Day!',
+	  '<3 Boys'
+	];
+
+	var x = 50;
+	var y = 150;
+	var fontSize = 22;
+	var gradient = context.createLinearGradient(x,y,x,y + victoryMessage.length * fontSize);
+
+	gradient.addColorStop(0,"pink");
+	gradient.addColorStop(1,"purple");
+	context.fillStyle = gradient;
+	context.font =  fontSize + 'px serif';
+
+	victoryMessage.forEach(function(line) {
+		context.fillText(line, x, y, canvas.width);
+		y += fontSize;
+	});
+
+	mom.putOnCanvas();
+}
 
 // Assign movement to keyboard
-
 document.addEventListener('keydown', function (e) {
 	e.preventDefault();
 	if (e.keyCode === 37) {
@@ -248,6 +305,12 @@ document.addEventListener('keydown', function (e) {
 	if (e.keyCode === 32) {
 		mom.heal();
 	}
-
 })
+
+document.addEventListener('keyup', function(e) {
+	if (e.keyCode === 37 || e.keyCode === 39) {
+		mom.stopMoving();
+	}
+})
+
 tick();
