@@ -323,7 +323,7 @@ document.addEventListener('keyup', function(e) {
 	if (e.keyCode === 37 || e.keyCode === 39) {
 		mom.stopMoving();
 	}
-})
+});
 
 // Start zombie noise
 var zombieNoise = new Audio();
