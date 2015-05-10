@@ -285,11 +285,11 @@ var greatSuccess = function() {
 	var x = 50;
 	var y = 150;
 	var fontSize = 22;
-	var gradient = context.createLinearGradient(x,y,x,y + victoryMessage.length * fontSize);
+	// var gradient = context.createLinearGradient(x,y,x,y + victoryMessage.length * fontSize);
 
-	gradient.addColorStop(0,"pink");
-	gradient.addColorStop(1,"purple");
-	context.fillStyle = gradient;
+	// gradient.addColorStop(0,"pink");
+	// gradient.addColorStop(1,"purple");
+	context.fillStyle = 'purple';
 	context.font =  fontSize + 'px serif';
 
 	victoryMessage.forEach(function(line) {
@@ -328,7 +328,7 @@ document.addEventListener('keyup', function(e) {
 // Start zombie noise
 var zombieNoise = new Audio();
 zombieNoise.src = './audio/brains.m4a';
-// zombieNoise.play();
+zombieNoise.play();
 
 // Kick off game loop;
 tick();
