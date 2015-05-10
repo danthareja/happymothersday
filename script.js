@@ -7,11 +7,11 @@ var makeMom = function (src, x, y) {
 	var velocity = 15;
 	var moving = false;
 
-	var mom = new Image();
-	mom.src = src;
+	var momImage = new Image();
+	momImage.src = src;
 
 	var putOnCanvas = function () {
-		context.drawImage(mom, x, y, height, width);
+		context.drawImage(momImage, x, y, height, width);
 	}
 
 	var stopMoving = function() {
@@ -110,6 +110,9 @@ var makeFamilyMember = function (src, x, y) {
 	}
 
 	var saveWithMomsLove = function() {
+		var savedNoise = new Audio();
+		savedNoise.src = './audio/saved.m4a';
+		savedNoise.play();
 		saved = true;
 	}
 
@@ -129,13 +132,17 @@ var makeFamilyMember = function (src, x, y) {
 	};
 };
 
+var healingRay = new Image();
+healingRay.src = './images/heart.png'
+
 var makeHealingRay = function (x, y) {
 	var height = 15;
 	var width = 15;
 	var velocity = 8;
 
-	var healingRay = new Image();
-	healingRay.src = './images/heart.png'
+	var healingRaySound = new Audio();
+	healingRaySound.src = './audio/pew.m4a';
+	healingRaySound.play();
 
 	var putOnCanvas = function() {
 		context.drawImage(healingRay, x, y, height, width);
@@ -290,6 +297,11 @@ var greatSuccess = function() {
 		y += fontSize;
 	});
 
+	var gameWonNoise = new Audio();
+	gameWonNoise.src = './audio/winnerwinnerchickendinner.m4a';
+	gameWonNoise.play();
+
+	// Add mom for full effect	
 	mom.putOnCanvas();
 }
 
@@ -313,4 +325,10 @@ document.addEventListener('keyup', function(e) {
 	}
 })
 
+// Start zombie noise
+var zombieNoise = new Audio();
+zombieNoise.src = './audio/brains.m4a';
+// zombieNoise.play();
+
+// Kick off game loop;
 tick();
